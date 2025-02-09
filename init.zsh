@@ -1,4 +1,13 @@
-# This is example code.
-# This will be executed when this module is initialized during Zsh startup.
+() {
+  builtin emulate -L zsh
+  local -r target_dir=${1}
+  shift
 
-print "executed code in ${0}"
+  (( ${+commands[${1}]} )) || return 1
+
+  local compfile=$target_dir/functions/_${1}
+  if [[ ! -e $compfile || $compfile -ot ${1} ]]; then
+    "${@}" >| $compfile
+    print -u2 -PR "* Detected a new version '${1}'. Regenerated completions."
+  fi
+} ${0:h} zellij setup --generate-completion zsh
